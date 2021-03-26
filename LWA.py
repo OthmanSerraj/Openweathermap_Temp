@@ -22,15 +22,24 @@ class LWA:
         url = "https://api.openweathermap.org/data/2.5/forecast?q={}&units=metric&appid={}".format(self.location, self.api_key)
         r = requests.get(url)
         return r.json()
+    @staticmethod
+    def day_num(mydict,i=0):
+        x=mydict["list"][i]["dt_txt"].split()[0]
+        for num,elm in enumerate(mydict["list"][i:]):
+            if elm["dt_txt"].split()[0]!=x:return num
+        return 0
     def get_max_tempnhday(self):
-        zero_day=self.city_5days_infos["list"][0]["dt_txt"].split()[0]
+        begin_num=self.day_num(self.city_5days_infos)
+        zero_day=self.city_5days_infos["list"][begin_num]["dt_txt"].split()[0]
         maxtp=-273.15#zero absolu
         wanted_date=""
         Lista=[]
-        for num,elm in enumerate(self.city_5days_infos["list"]):
+        xp=0
+        for num,elm in enumerate(self.city_5days_infos["list"][begin_num:]):
             date=elm["dt_txt"]
             actual_day=date.split()[0]
             if zero_day!=actual_day:
+                xp=num
                 Lista.append({"Date":wanted_date,"max_temp":maxtp})
                 zero_day=actual_day
                 maxtp=-273.15#zero absolu
@@ -38,6 +47,14 @@ class LWA:
             if mytemp>maxtp:
                 maxtp=mytemp
                 wanted_date=elm["dt_txt"]
+        end_num=xp+1
+        maxtp=-273.15
+        for elm in self.city_5days_infos["list"][end_num:]:
+            mytemp=elm["main"]["temp_max"]
+            if mytemp>maxtp:
+                maxtp=mytemp
+                wanted_date=elm["dt_txt"]
+        Lista.append({"Date":wanted_date,"max_temp":maxtp})
         return Lista
 
     def get_speed(self):
@@ -51,7 +68,3 @@ class LWA:
         with open(file_store_temp,"w") as fr:
             json.dump(self.city_5days_infos, fr,indent=3)
         if open_show:os.startfile(file_store_temp)
-# if __name__== "__main__":
-#     location="paris"
-#     Z=LWA(location)
-#     print(Z.get_last_weather())
