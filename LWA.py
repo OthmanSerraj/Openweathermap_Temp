@@ -1,6 +1,7 @@
 import os
 import json
 import requests
+from datetime import datetime
 os.chdir("C:\\Users\\User\\Desktop\\LipWeatherApi")#optional to be changed in real world
 class LWA:
     def __init__(self,location):
@@ -25,7 +26,8 @@ class LWA:
     @staticmethod
     def day_num(mydict):
         L_day=[]
-        x=mydict["list"][0]["dt_txt"].split()[0]
+        x=datetime.now().strftime("%Y-%m-%d")
+        print(x)
         for num,elm in enumerate(mydict["list"]):
             selm=elm["dt_txt"].split()[0]
             if x!=selm:
